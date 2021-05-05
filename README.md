@@ -21,27 +21,21 @@ Edit variables to match you needs
 #!/bin/bash
 
 ### Edit values below ###
-#VM ID
-id=100
-#VM Name
-name=ubuntu2004
-#Memory im megabytes
-ram=2048
-#CPU cores
-cpu=1
-#Default disk is 2G, variable below = 2G + selected value
-disk=18
-#Usermame and password
-user=Ubuntu
-password=Ubuntu123
-#Qemu agent (1,0)
-qemu_agent=1
-#Disk format(qcow2, raw, vmdk)
-dformat=qcow2
+id=999 #Unique proxmox ID 
+name=ubuntu2004 #Machine name
+ram=2048 #Amount of memory in megabytes
+cpu=1 #Number of cpu cores
+disk=18 #How much to expand the disk, default is 2G so 2+18=20GB total
+dformat=qcow2 #Disk format, raw, qcow2 or vmdk
+user=Ubuntu #Username
+password=Ubuntu123 #Password
+onboot=1 # 1 or 0 to enable/disable VM boot on proxmox startup
+qemu_agent=1 # 1 or 0 for enable/disable of the qemu agent. Note: qemu-guest-agent needs to be installed in the VM afterwards
 ### Edit values above ###
 
 idfree=`pvesh get /cluster/nextid -vmid $id`
 if [ $idfree == $id ]; then
+    echo -e "\e[32mVM ID free, running script. \e[0m]"
     echo -e "\e[33mDownloading Ubuntu 20.04 Cloud image. \e[0m"
     wget https://cloud-images.ubuntu.com/focal/current/focal-server-cloudimg-amd64.img
     echo -e "\e[33mCreating VM. \e[0m"
@@ -56,6 +50,7 @@ if [ $idfree == $id ]; then
     qm set $id --ipconfig0 ip=dhcp
     qm set $id --sshkey ~/.ssh/id_rsa.pub
     qm set $id --cipassword $password
+    qm set $id --onboot $onboot
     qm set $id --agent $qemu_agent
     echo -e "\e[33mCleaning up. \e[0m"
     rm focal-server-cloudimg-amd64.img
@@ -77,6 +72,6 @@ My needs are pretty simple so i prefer this over template, I use Ansible to do e
 **Useful resources:**
 - https://pve.proxmox.com/wiki/Cloud-Init_Support
 - https://pve.proxmox.com/pve-docs/qm.1.html
-- https://pve.proxmox.com/pve-docs/qm.1.html
+- https://pve.proxmox.com/pve-docs/pvesh.1.html
 - https://cloud-images.ubuntu.com/
 - https://ubuntu.com/server/docs/cloud-images/introduction
